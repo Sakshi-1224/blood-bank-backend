@@ -32,10 +32,3 @@ export const isAdmin = (req, res, next) => {
 };
 
 
-export const isSeeker = (req, res, next) => {
-  if (req.user && req.user.role === 'SEEKER') {
-    next();
-  } else {
-    res.status(403).json({ message: "Access denied. Seeker privileges required." });
-  }
-};
