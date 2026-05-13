@@ -1,76 +1,87 @@
-import Member from "../models/Member.js";
+import Member from "../models/member.js";
 import { Op } from "sequelize";
 
 export const searchDonors = async (req, res) => {
   try {
-    const { blood_group, city, minAge, maxAge } = req.query;
+    const { bloodGroup, city, minAge, maxAge } = req.query;
 
-    if (!blood_group) {
-      return res.status(400).json({
-        message: "blood_group is mandatory"
-      });
-    }
-
-    const maxAgeNum = Number(maxAge);
     const minAgeNum = Number(minAge);
+    const maxAgeNum = Number(maxAge);
 
-    if (maxAge && maxAgeNum > 60) {
+    if (
+      (minAge && minAgeNum < 18) ||
+      (maxAge && maxAgeNum > 60)
+    ) {
       return res.status(400).json({
-        message: "Maximum donor age cannot exceed 60"
+        message: "Donor age must be between 18 and 60",
       });
     }
 
     const whereCondition = {
-      blood_group,
-      is_active: true
+      isActive: true,
     };
 
+    if (bloodGroup) {
+      whereCondition.bloodGroup = bloodGroup;
+    }
+
     if (city) {
-      whereCondition.current_address = {
-        [Op.like]: `%${city}%`
+      whereCondition.currentAddress = {
+        [Op.like]: `%${city}%`,
       };
     }
 
     if (minAge || maxAge) {
       const today = new Date();
+
       const dobCondition = {};
 
       if (maxAge) {
         const minDOB = new Date();
-        minDOB.setFullYear(today.getFullYear() - maxAgeNum);
+
+        minDOB.setFullYear(
+          today.getFullYear() - maxAgeNum
+        );
+
         dobCondition[Op.gte] = minDOB;
       }
 
       if (minAge) {
         const maxDOB = new Date();
-        maxDOB.setFullYear(today.getFullYear() - minAgeNum);
+
+        maxDOB.setFullYear(
+          today.getFullYear() - minAgeNum
+        );
+
         dobCondition[Op.lte] = maxDOB;
       }
 
-      whereCondition.date_of_birth = dobCondition;
+      whereCondition.dateOfBirth = dobCondition;
     }
 
     const donors = await Member.findAll({
       where: whereCondition,
+
       attributes: [
         "id",
         "name",
-        "blood_group",
-        "mobile_number",
-        "date_of_birth",
-        "current_address"
-      ]
+        "bloodGroup",
+        "mobileNumber",
+        "dateOfBirth",
+        "currentAddress",
+        "permanentAddress",
+      ],
     });
 
     res.status(200).json({
       message: `Found ${donors.length} donor(s)`,
-      donors
+      donors,
     });
-
   } catch (error) {
     console.error("Error searching donors:", error);
+
     res.status(500).json({
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };

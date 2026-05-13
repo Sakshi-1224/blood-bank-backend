@@ -1,21 +1,23 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import sequelize , {connectDB} from './config/database.js';
-import Admin from './models/Admin.js';
-import Member from './models/Member.js';
+import Admin from './models/admin.js';
+import Member from './models/member.js';
 import authRoutes from './routes/authRoutes.js'; 
 import searchRoutes from './routes/searchRoutes.js';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 dotenv.config();
 
 const app=express();
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Your React frontend URL
+  origin: process.env.FRONTEND_URL, // Your React frontend URL
   credentials: true // Allows sending tokens/cookies if needed
 }));
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 
