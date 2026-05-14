@@ -1,4 +1,3 @@
-import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Admin from "../models/admin.js";
@@ -29,10 +28,7 @@ export const loginAdmin = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      admin.password
-    );
+    const isMatch = await bcrypt.compare(password, admin.password);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -42,12 +38,11 @@ export const loginAdmin = async (req, res) => {
 
     const token = generateToken(admin.id, "ADMIN");
 
-    // Set cookie
     res.cookie("token", token, {
-      httpOnly: true, // Prevents XSS attacks
-      secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
-      sameSite: "lax", // Prevents CSRF
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax", 
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({

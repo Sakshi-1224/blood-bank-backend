@@ -1,15 +1,15 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import sequelize , {connectDB} from './config/database.js';
-import Admin from './models/admin.js';
-import Member from './models/member.js';
 import authRoutes from './routes/authRoutes.js'; 
 import searchRoutes from './routes/searchRoutes.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 dotenv.config();
 
 const app=express();
+app.use(helmet());
 
 app.use(cors({
   origin: process.env.FRONTEND_URL, // Your React frontend URL
